@@ -1,0 +1,90 @@
+{% extends "layouts/base.html" %} {% block title %}Login{% endblock %} {% block
+content %} {#% include "components/navbar.html" %#}
+<div
+  class="flex min-h-screen flex-col items-center justify-center bg-white bg-gradient-to-b from-[rgb(214,219,220)] to-white p-10 dark:from-slate-700 dark:to-slate-950 sm:p-24"
+>
+  <div
+    class="w-full max-w-md space-y-3 rounded-xl bg-white p-8 before:ml-96 dark:bg-gray-900 dark:text-gray-100"
+  >
+    <!-- <div class="flex justify-center">
+      <image src="/hbt-system.png" width="200" height="100" alt="" />
+    </div> -->
+    <div id="alert"></div>
+    <form
+      target="_blank"
+      class="space-y-3"
+      hx-post="/login"
+      hx-swap="innerHTML"
+      hx-target="#alert"
+      method="post"
+    >
+      <div class="space-y-1 text-sm">
+        <label class="block dark:text-gray-400">Username</label>
+        <input
+          type="text"
+          name="username"
+          id="username"
+          placeholder="Username"
+          class="w-full rounded-md border border-gray-700 px-4 py-3 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 focus:dark:border-violet-400"
+        />
+      </div>
+      <div class="space-y-1 text-sm">
+        <label class="block dark:text-gray-400">Password</label>
+        <input
+          type="password"
+          name="password"
+          id="password"
+          placeholder="Password"
+          class="w-full rounded-md border border-gray-700 px-4 py-3 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 focus:dark:border-violet-400"
+        />
+      </div>
+      <button
+        type="submit"
+        class="flex w-full items-center justify-center gap-2 rounded-md bg-primary p-3 text-white hover:bg-sky-600"
+      >
+        Login
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          fill="currentColor"
+          viewBox="0 0 256 256"
+          class="ml-2 h-4 w-4"
+        >
+          <rect width="256" height="256" fill="none"></rect>
+          <line
+            x1="40"
+            y1="128"
+            x2="216"
+            y2="128"
+            fill="none"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="24"
+          ></line>
+          <polyline
+            points="144 56 216 128 144 200"
+            fill="none"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="24"
+          ></polyline>
+        </svg>
+        <svg class="animate-rotate ml-2 h-4 w-4" viewBox="0 0 50 50">
+          <circle
+            class="animate-dash stroke-white"
+            cx="25"
+            cy="25"
+            r="20"
+            fill="none"
+            strokeWidth="5"
+            strokeLinecap="round"
+          ></circle>
+        </svg>
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}
