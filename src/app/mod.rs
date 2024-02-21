@@ -1,5 +1,10 @@
 use anyhow::Context;
-use axum::{Extension, Router};
+use axum::body::Body;
+use axum::extract::Host;
+use axum::http::{Request, StatusCode};
+use axum::response::{IntoResponse, Redirect, Response};
+use axum::middleware::Next;
+use axum::{middleware, Extension, Router};
 use sqlx::SqlitePool;
 use std::sync::Arc;
 use tracing::info;
@@ -23,11 +28,11 @@ struct ApiContext {
     db: SqlitePool,
 }
 
-// TODO: Implement auth (cookie check) middleware with redirect to login
 pub async fn serve(config: Config, db: SqlitePool) -> anyhow::Result<()> {
     let port = config.port;
     let assets_path = std::env::current_dir().unwrap();
-    let app = app_router().nest("/api", api_router())
+    let app = app_router()
+    .nest("/api", api_router())
     .layer(
         ServiceBuilder::new()
             .layer(Extension(ApiContext {
@@ -51,9 +56,26 @@ pub async fn serve(config: Config, db: SqlitePool) -> anyhow::Result<()> {
         .context("error running HTTP server")
 }
 
+// TODO: Check cookie
+async fn auth_check<T>(Host(host): Host, req: Request<Body>, next: Next) -> Result<Response, StatusCode> {
+    info!("Middleware Ran");
+    let authed = true;
+    if !authed { 
+        let redirect = "http://".to_owned() + &host + "/login";
+        let mut res = Redirect::to(&redirect).into_response();
+        // HTMX way not needed with complete 303 redirect url.
+        // res.headers_mut().insert("HX-Redirect", "/".parse().unwrap());
+        Ok(res)
+    } else {
+        Ok(next.run(req).await)
+    }
+}
+
 fn app_router() -> Router {
-    login::router()
-        .merge(dashboard::router())
+    dashboard::router()
+    .layer(middleware::from_fn(auth_check::<Request<Body>>))
+    .merge(login::router())
+
 }
 
 fn api_router() -> Router {

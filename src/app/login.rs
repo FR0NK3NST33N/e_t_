@@ -1,6 +1,8 @@
 use std::fmt::Debug;
 
-use axum::extract::Extension;
+use axum::body::Body;
+use axum::extract::{Extension, Host};
+// use axum::http::Response;
 use axum::response::{Redirect, Response, IntoResponse};
 use axum::routing::{get, post};
 use axum::{Form, Json, Router};
@@ -37,14 +39,17 @@ pub struct AuthenticateUser {
 }
 
 // TODO: Implement salted and hashed pass, plus check.
-pub async fn login_post(ctx: Extension<ApiContext>, Form(auth): Form<AuthenticateUser>) -> Result<Response> {
+pub async fn login_post(Host(host): Host, ctx: Extension<ApiContext>, Form(auth): Form<AuthenticateUser>) -> Result<Response> {
     info!("[/login] post requested");
-    let template = components::AlertTemplate { id: String::from("login_error"), error: String::from("something went wrong")};
+    let template = components::AlertTemplate { id: String::from("alert"), error: String::from("something went wrong")};
     match fetch_user_by_username(ctx, auth.username).await {
         Ok(user) => {
             if auth.password == user.password { 
                 info!("auth successful");
-                let mut res = Redirect::to("").into_response();
+                // for if 303 starts working. e
+                // let redirect = "http://".to_owned() + &host;
+                // let mut res = Redirect::to("").into_response();
+                let mut res = Response::new(Body::new("".to_string()));
                 res.headers_mut().insert("HX-Redirect", "/".parse().unwrap());
                 return Ok(res);
             }
@@ -79,7 +84,7 @@ async fn fetch_user_by_username(ctx: Extension<ApiContext>, username: String) ->
         username,
     )
     .fetch_optional(&ctx.db)
-    .await?.ok_or(Error::unprocessable_entity([("user", "user not found")])).unwrap();
+    .await?.ok_or(Error::unprocessable_entity([("error", "query error")]))?;
     
     Ok(Json(User {
         id: user.id.unwrap(), 
